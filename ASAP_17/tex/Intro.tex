@@ -1,0 +1,20 @@
+\section{Introduction}
+Model predictive control (MPC) is a popular advanced control algorithm for controlling systems that must respect a set of system constraints (e.g. actuator force limitations). MPC has found its way into a wide range of applications, such as industrial chemical plants~\cite{doi:10.1080/00986445.2011.592446}, power converters~\cite{4682711}, traffic networks~\cite{4602084}, and unmanned aerial vehicles(UAVs)~\cite{1429425}. However, for two decades after its introduction in the late 1970's by J. Richalet~\cite{Richalet1978413}, this advanced control technique gained little traction outside of systems requiring update rates on the order of seconds to minutes~\cite{maciejowski2002}. A primary reason for its lack of adoption as compared to other control strategies such as proportional-integral-derivative (PID) and optimal linear quadratic control was due to its intense computing demands. 
+
+Methods for using limited computing resources to increase MPC update rates has become a central problem for deploying MPC controllers into embedded systems for controlling increasingly complex systems at KHz and closing in on MHz update rates. In this paper we use the parallelizable operator splitting method, also referred to as alternating directions method of multipliers (ADMM), to solve the linear-quadratic MPC problem. Apart from its parallelizability, the algorithm is division-free~\cite{6422363}. We build the design for a Zynq-7020 Field Programmable Gate Array (FPGA) device to exploit its potential computation parallelism. Our proposed design targets control algorithm and embedded software system developers that wish to make use of the computing capabilities of FPGAs to accelerate MPC, but may have little knowledge of FPGA hardware design.
+
+\textit{Contributions.} 
+The primary contribution of this work is a software/hardware (SW/HW) co-design that allows: 1) configuring an MPC controller for a wide range of plants, 2) updating at run-time the desired trajectory to track, 3) the flexibility to trade off hardware resources for computing speed, and 4) easing controller deployment by introducing an SW/HW co-design to decouple hardware details from control and embedded software engineers.
+
+%\subsection*{Summary of main points or contribution}
+%\begin{enumerate}
+%      \item Find the bottleneck of MPC hardware acceleration and analyze resource usage/limitation;
+%    \item fully-pipelined dataflow in floating-point format targeting various control systems;
+%    \item Allow software to setup the desired state trajectory at runtime.
+%    \item Generalized software/hardware co-design, ease the controller deploy by control engineers.
+%    
+%\end{enumerate}
+
+\textit{Organization.}
+The remainder of this paper is organized as follows. Section~\ref{rw} reviews works related 
+to MPC computation. Section~\ref{MPC} then presents a brief summary of MPC basics using state space modeling and the concept of ADMM. Section~\ref{arch} gives the hardware architecture and analyzes its bottlenecks. Section~\ref{eva} evaluates the hardware resource usage, maximum clock frequency, and provides experimental controller results. Section~\ref{con} concludes the paper.
