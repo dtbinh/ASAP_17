@@ -74,13 +74,34 @@
 
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
 }
-
+\usepackage{bbm}
+\usepackage{tikz}
+\usetikzlibrary{graphs}
+\usetikzlibrary{overlay-beamer-styles}
+\newcommand{\tikzmark}[1]{\tikz[remember picture] \node[coordinate] (#1) {#1};}
+\usepackage{verbatim}
+\usetikzlibrary{arrows,shapes}
 \usepackage{graphicx} % Allows including images
 \usepackage{amsmath}
 \newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
-
+\usepackage{hyperref}
+\usepackage[font=footnotesize,justification=centering]{caption}
+\tikzset{
+  invisible/.style={opacity=0},
+  visible on/.style={alt={#1{}{invisible}}},
+  alt/.code args={<#1>#2#3}{%
+    \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+  },
+  marked/.style={
+    %color=white,
+    fill=green!20,
+  },
+  marked on/.style={alt=#1{marked}{}}
+  }
+%\usepackage{algorithm,algorithmic}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
@@ -99,7 +120,10 @@ Iowa State University\\ % Your institution for the title page
 }
 \date{\today} % Date, can be changed to a custom date
 
+
+
 \begin{document}
+
 
 \begin{frame}
 \titlepage % Print the title page as the first slide
@@ -241,11 +265,125 @@ R_k^TQX_k}
 \end{equation}
 \end{frame}
 %------------------------------------------------
+%------------------------------------------------
+\begin{frame}
+\frametitle{Box Constraints}
+
+\end{frame}
+%------------------------------------------------
+
 
 \subsection{Splitting Method}
 %------------------------------------------------
-\begin{frame}
 
+
+\begin{frame}  
+\frametitle{Consensus Form}
+One technique for partitioning variables in ADMM is writing the convex QP problem into consensus form:
+
+\begin{align*}
+&minimize:\;  \tikz[baseline,remember picture]{\node[anchor=base,marked on=<2->] (t1){$\mathbbm{1}_{\mathcal{D}}(\chi)+\phi(\chi)$};} + \tikz[baseline,remember picture]{\node[anchor=base,marked on=<2->] (t2){$\mathbbm{1}_{\mathcal{C}}(\zeta)$};}\\
+&subject\;  to:\; \chi=\zeta
+\end{align*}
+
+\hspace{35.3 mm} \visible<2->{\tikz[baseline,remember picture]{\node[fill=green!20,anchor=base] (n1){$g(\chi)$};}}
+\hspace{15.3 mm} \visible<2->{\tikz[baseline,remember picture]{\node[fill=green!20,anchor=base] (n2){$f(\zeta)$};}}
+%\tikz[remember picture] \node[coordinate] (n1) {};
+
+\begin{tikzpicture}[remember picture,overlay]   %% use here too
+        \path[draw=magenta,thick,->]<2->([yshift=0mm,xshift=0mm]n1.north) to [out=0, in=0,distance=-0.1in] (t1.south);
+\end{tikzpicture}
+
+%\tikz[remember picture] \node[coordinate] (n2) {};
+\begin{tikzpicture}[remember picture,overlay]   %% use here too
+        \path[draw=magenta,thick,->]<2->([yshift=0mm,xshift=0mm]n2.north) to [out=0, in=0in,distance=-0.1in] (t2.south);
+\end{tikzpicture}
+
+%\begin{align*}
+%&minimize:\;  \mathbbm{1}_{\mathcal{D}}(\chi)+\phi(\chi) +\mathbbm{1}_{\mathcal{C}}(\zeta)\\
+%&subject\;  to:\; \chi=\zeta
+%\end{align*}
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}  
+\frametitle{Consensus Form}
+\begin{align*}
+&g(\chi)=\mathbbm{1}_{\mathcal{D}}(\chi)+\phi(\chi)\\
+&f(\zeta)=\mathbbm{1}_{\mathcal{C}}(\zeta) 
+\numberthis \label{eq:gf}
+\end{align*}
+\begin{align}
+&\chi^{i+1}:=prox_{g,\rho}(\zeta^i+\upsilon^i)\label{eq:xi}\\
+&\zeta^{i+1}:=prox_{f,\rho}(\chi^{i+1}+\upsilon^i)\label{eq:zi}\\
+&\upsilon^{i+1}:=\upsilon^i+\rho (\chi^{i+1}-\zeta^{i+1})\label{eq:vi}
+\end{align}
+Here, $i$ is the iteration counter, $prox_{f,\rho}(\chi)$ is the proximal mapping (or proximal operator) of a convex function $f$: 
+\begin{equation*}
+prox_{f,\rho}(\chi)=arg\;\underset{u}{\min}(f(u)+\frac{\rho}{2}\| \chi-u\| _2^2)
+\end{equation*}
+$\rho>0$ is the dual update step length. 
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Solve $\chi^{i+1}$}
+\framesubtitle{Matrix-vector Multiply (MvM)}
+KKT Condition
+\begin{align*}
+&minimize:\;  \frac{1}{2} ({\chi^{i+1}})^{T}E\chi^{i+1}+l^T\chi^{i+1}\\
+ &subject\;  to:\; G\chi^{i+1}=h
+\numberthis \label{eq:quad}
+\end{align*}
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Solve $\zeta^{i+1}$}
+\framesubtitle{Saturation Function}
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Solve $\upsilon^{i+1}$}
+\framesubtitle{Vector Plus Vector}
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{ADMM Algorithm}
+\begin{algorithm}[H]
+Start from $i=0$ with arbitrary $\zeta^0$ and $\upsilon^0$.
+\SetKwRepeat{Do}{do}{until}
+\caption{ADMM algorithm}\label{alg:ADMM}
+\Do{stopping criterion is satisfied}{
+$l:=
+\begin{bmatrix}
+	Q*R_k\\
+	\textbf{0}
+\end{bmatrix}-\rho (\zeta^{i}+\upsilon^{i})$ 
+	
+	$\chi^{i+1}:=
+	M_{11}*
+	\begin{bmatrix}
+	-l&x_{k}
+	\end{bmatrix}^T$ 
+	
+	$\zeta^{i+1}:=sat(\chi^{i+1}-\upsilon^i,\textbf{dom}\: {\mathcal{C}})$ 
+	
+	$\upsilon^{i+1}:=\upsilon^i+\rho (\zeta^{i+1}-\chi^{i+1})$ 
+	$i:=i+1$
+}
+\end{algorithm}
 \end{frame}
 %------------------------------------------------
 
@@ -253,18 +391,115 @@ R_k^TQX_k}
 
 \section{ADMM Hardware Architecture}
 \subsection{Architecture Overview}
+%------------------------------------------------
+\begin{frame}
+\frametitle{Hardware Architecture}
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.45\textwidth} % Left column and width
+\begin{block}{Step 1}
+Solve KKT
+\end{block}
+\begin{block}{Step 2}
+Saturation Function
+\end{block}
+\begin{block}{Step 3}
+Update $\upsilon$
+\end{block}
+\begin{block}{Step 4}
+Update $l$
+\end{block}
+
+
+
+
+\column{.5\textwidth} % Right column and width
+\begin{figure}[t]
+\centering
+\captionsetup{justification=centering}
+\includegraphics[scale=.40]{../ASAP_17/figure/architecture.pdf}
+\DeclareGraphicsExtensions.
+\caption{Hardware Architecture for ADMM with Relaxation Parameter $\alpha$.\label{fig_arch}}
+\end{figure}
+\end{columns}
+\end{frame}
+%------------------------------------------------
+\begin{frame}
+\frametitle{Hardware Architecture}
+\framesubtitle{Reduce Circuit}
+\begin{figure}[t]
+\centering
+\captionsetup{justification=centering}
+\includegraphics[scale=0.9]{../ASAP_17/figure/Reduce.pdf}
+\DeclareGraphicsExtensions.
+\caption{Reduce Circuit Architecture with Two Cascaded Adders\label{fig_red}}
+\end{figure}
+\end{frame}
+%------------------------------------------------
+
+
 \subsection{Trajectory Setting During Runtime}
+%------------------------------------------------
+\begin{frame}
+\frametitle{Hardware Architecture}
+\framesubtitle{Runtime Trajectory Planning}
+\begin{figure}[t]
+\centering
+\captionsetup{justification=centering}
+\includegraphics[scale=.75]{../ASAP_17/figure/trajectoryProfile.pdf}
+\DeclareGraphicsExtensions.
+\caption{Runtime Trajectory Planning\label{fig_traj}}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------
+
 \subsection{Latency Analysis}
+%------------------------------------------------
+\begin{frame}
+
+\end{frame}
+%------------------------------------------------
+
 \section{Evaluation}
+%------------------------------------------------
+\begin{frame}
+\frametitle{Mass-spring System}
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Emulation using Plant on Chip}
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{SW/HW Co-design}
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Computation Speed Versus Hardware Resources}
+
+\end{frame}
+%------------------------------------------------
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Resource Utilization and Timing Summary}
+
+\end{frame}
+%------------------------------------------------
+
+
 
 \section{Conclusion}
 
-\begin{frame}
-\frametitle{Paragraphs of Text}
-Sed iaculis dapibus gravida. Morbi sed tortor erat, nec interdum arcu. Sed id lorem lectus. Quisque viverra augue id sem ornare non aliquam nibh tristique. Aenean in ligula nisl. Nulla sed tellus ipsum. Donec vestibulum ligula non lorem vulputate fermentum accumsan neque mollis.\\~\\
 
-Sed diam enim, sagittis nec condimentum sit amet, ullamcorper sit amet libero. Aliquam vel dui orci, a porta odio. Nullam id suscipit ipsum. Aenean lobortis commodo sem, ut commodo leo gravida vitae. Pellentesque vehicula ante iaculis arcu pretium rutrum eget sit amet purus. Integer ornare nulla quis neque ultrices lobortis. Vestibulum ultrices tincidunt libero, quis commodo erat ullamcorper id.
-\end{frame}
 
 %------------------------------------------------
 
