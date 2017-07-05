@@ -82,7 +82,8 @@
 \usepackage{verbatim}
 \usetikzlibrary{arrows,shapes}
 \usepackage{graphicx} % Allows including images
-\usepackage{amsmath}
+\usepackage{mathtools}
+%\usepackage{amsmath}
 \newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
@@ -244,6 +245,7 @@ Where:
 %------------------------------------------------
 \begin{frame}
 \frametitle{Cost Function}
+Cost function:
 \begin{equation}
 \scalemath{0.8}{
 \begin{split}
@@ -251,6 +253,8 @@ Where:
 \label{eq:costf}
 \end{split}}
 \end{equation}
+
+Compact matrix format:
 \begin{equation}
 \scalemath{0.8}{
 \mathbb{C}(k)=\frac{1}{2}
@@ -277,7 +281,14 @@ R_k^TQX_k}
 %------------------------------------------------
 \begin{frame}
 \frametitle{Box Constraints}
-
+\framesubtitle{Constraints in the QP Problem}
+The state $X_k$, input $U_k$ and input rate of change $\Delta U_k$ are constrained by its lower and upper value respectively:
+\[
+  \begin{cases*}
+    min(x) \leq x_k \leq max(x)\\
+    min(\Delta u) \leq \Delta u_k \leq max(\Delta u)\\
+    min(u) \leq u_k \leq max(u)
+  \end{cases*}\]
 \end{frame}
 %------------------------------------------------
 
@@ -356,6 +367,12 @@ KKT Condition
 \frametitle{Solve $\zeta^{i+1}$}
 \framesubtitle{Saturation Function}
 
+\[ f(\zeta ^{i+1}) =
+  \begin{cases*}
+   \chi^{i+1}-\upsilon^i \quad& , if $ min(\zeta) \leq \zeta^{i+1} \leq max(\zeta)$\\
+   f(min(\zeta)) & , if $\zeta^{i+1} \leq min(\zeta) $ \\
+   f(max(\zeta)) & , if $\zeta^{i+1} \geq max(\zeta) $ \\
+  \end{cases*}\]
 \end{frame}
 %------------------------------------------------
 
@@ -379,17 +396,14 @@ $l:=
 \begin{bmatrix}
 	Q*R_k\\
 	\textbf{0}
-\end{bmatrix}-\rho (\zeta^{i}+\upsilon^{i})$ 
-	
+\end{bmatrix}-\rho (\zeta^{i}+\upsilon^{i})$ \\
 	$\chi^{i+1}:=
 	M_{11}*
 	\begin{bmatrix}
 	-l&x_{k}
-	\end{bmatrix}^T$ 
-	
-	$\zeta^{i+1}:=sat(\chi^{i+1}-\upsilon^i,\textbf{dom}\: {\mathcal{C}})$ 
-	
-	$\upsilon^{i+1}:=\upsilon^i+\rho (\zeta^{i+1}-\chi^{i+1})$ 
+	\end{bmatrix}^T$ \\
+	$\zeta^{i+1}:=sat(\chi^{i+1}-\upsilon^i,\textbf{dom}\: {\mathcal{C}})$ \\
+	$\upsilon^{i+1}:=\upsilon^i+\rho (\zeta^{i+1}-\chi^{i+1})$ \\
 	$i:=i+1$
 }
 \end{algorithm}
@@ -469,11 +483,21 @@ Update $l$
 \DeclareGraphicsExtensions.
 \caption{Reduce Circuit Architecture with Two Cascaded Adders\label{fig_red}}
 \end{figure}
-
-
-
 \end{frame}
 %------------------------------------------------
+\begin{frame}
+\frametitle{Hardware Architecture}
+\framesubtitle{Reduce Circuit}
+\begin{figure}[t]
+\centering
+\captionsetup{justification=centering}
+\includegraphics[scale=0.9]{../ASAP_17/figure/Reduce.pdf}
+\DeclareGraphicsExtensions.
+\caption{Reduce Circuit Architecture with Two Cascaded Adders\label{fig_red}}
+\end{figure}
+\end{frame}
+%------------------------------------------------
+
 
 
 \subsection{Trajectory Setting During Runtime}
@@ -495,6 +519,50 @@ Update $l$
 \subsection{Latency Analysis}
 %------------------------------------------------
 \begin{frame}
+\frametitle{Latency of Each Pipeline Stages}
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.450\textwidth} % Left column and width
+\begin{figure}[t!]
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] at (0,2.5) {
+\includegraphics[scale=.35]{../ASAP_17/figure/architecture.pdf}};
+
+\draw<1>[red,ultra thick,rounded corners,fill=orange,fill opacity=0.2] (0.6,6.2) rectangle (1.5,8.0);
+\draw<2>[red,ultra thick,rounded corners,fill=orange,fill opacity=0.2] (1.2,6.1) rectangle (3.5,8.0);
+\draw<3>[red,ultra thick,rounded corners,fill=orange,fill opacity=0.2] (0.1,2.8) rectangle (4.3,6.0);
+\draw<4>[red,ultra thick,rounded corners,fill=orange,fill opacity=0.2] (0.1,2.8) rectangle (4.3,8.0);
+
+
+\end{tikzpicture}
+\end{figure}
+\column{.50\textwidth} % Right column and width
+
+\footnotesize{
+
+The number of clock cycles to merge all the matrix and vector data into the MVM pipeline is:
+\begin{equation*}
+\label{eq:md}
+\tikz[baseline,remember picture]{\node[anchor=base,marked on=<1>]{$L_{read\_ M_{11}}=N_{ROW}*(N_R+1)$};} 
+\end{equation*}
+
+
+\begin{equation*}
+\tikz[baseline,remember picture]{\node[anchor=base,marked on=<2>] {$Binary Tree (L_{bt})=L_M+D_pL_A+N_R(L_A+2)$};} 
+\end{equation*}
+
+\begin{equation*}
+\tikz[baseline,remember picture]{\node[anchor=base,marked on=<3>] {$ Bottom Level (L_{bl})=6L_A+3L_M+L_C $};}  
+\end{equation*}
+
+Total Latency:
+\begin{equation*}
+\label{eq:tl}
+\tikz[baseline,remember picture]{\node[anchor=base,marked on=<4>] {$ L_{ADMM}=L_{bt}+L_{bl}+L_{read\_ M_{11}}$};}  
+\end{equation*}
+
+}
+
+\end{columns}
 
 \end{frame}
 %------------------------------------------------
@@ -502,7 +570,7 @@ Update $l$
 \section{Evaluation}
 %------------------------------------------------
 \begin{frame}
-\frametitle{Mass-spring System}
+\frametitle{Mass-spring System (Testbench)}
 \begin{figure}[t]
 \centering
 \captionsetup{justification=centering}
@@ -510,9 +578,57 @@ Update $l$
 \DeclareGraphicsExtensions.
 \caption{Mass-spring System\label{fig_ms}}
 \end{figure}
+\hrule
+\begin{itemize}
+	\item Objective: moving masses to desired positions by applying a force to each mass. 
+	\item State Variable: position ($P$) and speed ($\dot P$) of each mass\footnote{$P$ is the position relative to the initial position}
+	\item Constraints: 
+\[
+  \begin{cases*}
+    -0.5m\leq P\leq 0.5m\\
+    -0.5N\leq u\leq 0.5N\\
+    -0.1N/s \leq \Delta u\leq 0.1N/s
+  \end{cases*}\]
+\end{itemize}
 \end{frame}
 %------------------------------------------------
-\subsection{Palnt on Chip}
+\subsection{Plant on Chip}
+\begin{frame}
+\frametitle{Plant on Chip}
+A hardware component that emulates the physical behavior of a linear system.
+\begin{figure}
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] at (-8,0.3) {
+\includegraphics[scale=.35]{../pic/zynq.png}};
+
+\node[anchor=south west,inner sep=0] at (-4.25,1.3) {
+\includegraphics[scale=.10]{../pic/arrow.png}};
+
+\draw<1>[red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,xshift=-10.0, yshift=55] (-1.6,-0.8) rectangle (1.6,0.4);
+
+\node<1>[color=black,xshift=-10.0, yshift=55] at (0,0) {
+$x_{k+1}=A x_k + B u_k$ 
+};
+\node<1>[color=black,xshift=-10.0, yshift=55] at (0,-0.4) {
+$y_{k}=C x_k + D u_k $ 
+};
+
+\draw<1>[red,ultra thick,rounded corners,xshift=10.5, yshift=55,->] (-3,-2)--(-3,0)--(-2.5,0);
+
+\draw<1>[red,ultra thick,rounded corners,xshift=10.5, yshift=55,->] (1,0)--(1.5,0)--(1.5,-2);
+
+\node<1>[color=black,xshift=-20.0, yshift=55] at (-2,-2.5) { Input: $u_k$};
+
+\node<1>[color=black,xshift=-20.0, yshift=55] at (2.5,-2.5) { Sensor: $y_k$};
+
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+%------------------------------------------------
+
+
+
 \begin{frame}
 \frametitle{Emulation using Plant on Chip}
 \framesubtitle{Mass Position}
@@ -552,7 +668,51 @@ Update $l$
 
 \end{frame}
 %------------------------------------------------
+\begin{frame}
+\frametitle{Deploy Steps}
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.43\textwidth} % Left column and width
 
+\uncover<1->{\alert<1>{\begin{block}{Step 1}
+\small{According to system requirements, generate the bitstream in Vivado, and $M_{11}$ matrix in Matlab.}
+\end{block}}}
+\uncover<2->{\alert<2>{\begin{block}{Step 2}
+\small{Store $M_{11}$ to BRAM via AXI bus using ARM software.}
+\end{block}}}
+\uncover<3->{\alert<3>{\begin{block}{Step 3}
+\small{ARM software configures trajectory and box constraints.}
+\end{block}}}
+
+
+\column{.49\textwidth} % Right column and width
+\begin{figure}[t!]
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] at (0,0) {
+\includegraphics[scale=.74]{../ASAP_17/figure/copro.pdf}};
+
+
+\node<1>[draw,color=red] at (1,3.2) {$M_{11}$};
+\node<1>[draw,color=red,fill=orange,fill opacity=0.7] at (3,3.2) {Bitfile};
+\draw<1>[red,ultra thick,rounded corners,->] (3.6,3.2)--(4.1,3.2) -- (4.1,2);
+\node<2>[draw,color=red,fill=orange,fill opacity=0.7] at (1,1.2) {$M_{11}$};
+\draw<2>[red,ultra thick,rounded corners,->] (1,1.4)--(1,2.7) -- (2.9,2.7)--(2.9,1.7);
+\node<3>[draw,color=red,fill=orange,fill opacity=0.7] at (5,-0.1) {Trajectory};
+\draw<3>[red,ultra thick,rounded corners,->] (5,0)--(5,0.7)--(0.9,0.7) -- (0.9,2.7)--(2.9,2.7)--(2.9,1.7);
+
+\node<4>[draw,color=red,fill=green,fill opacity=0.7] at (4.4,-0.1) {Start};
+\node<4>[draw,color=red,fill=orange,fill opacity=0.7] at (5.4,-0.1) {Data};
+\draw<4>[red,ultra thick,rounded corners,->] (4.4,0)--(4.4,0.7)--(0.9,0.7) -- (0.9,2.7)--(5.2,2.7)--(5.2,1.7);
+\draw<4>[red,ultra thick,rounded corners,->] (5.4,1.2)--(5.4,0);
+\draw<4>[red,ultra thick,rounded corners,->] (3,2.7)--(3,1.7);
+\end{tikzpicture}
+\end{figure}
+
+\uncover<4->{\alert<4>{\begin{block}{Step 4}
+\small{Send start signal to the PoC, and collect data through UART to external computer and plot graph.}
+\end{block}}}
+
+\end{columns}
+\end{frame}
 
 %------------------------------------------------
 \begin{frame}
@@ -570,6 +730,34 @@ Update $l$
 \begin{frame}
 \frametitle{Potential Computation Parallism}
 
+\begin{figure}[t!]
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] at (-1.5,1) {
+\includegraphics[scale=.55]{../ASAP_17/figure/highParallel.pdf}};
+\node[anchor=south west,inner sep=0] at (6.5,1.8) {
+\includegraphics[scale=.15]{../ASAP_17/figure/architecture.pdf}};
+\draw[red,ultra thick,rounded corners,->] (4,1.3)--(6.5,1.7);
+\draw[red,ultra thick,rounded corners,->] (4,4.5)--(6.5,4.1);
+
+\end{tikzpicture}
+\end{figure}
+
+
+%\begin{figure}[!ht]
+%\centering
+%\captionsetup{justification=centering}
+%\includegraphics[scale=.55]{../ASAP_17/figure/highParallel.pdf}
+%\DeclareGraphicsExtensions.
+%\caption{Highly paralleled ADMM Hardware Solution\label{fig_hp}}
+%\end{figure}
+
+
+
+$L_{read\_ M_{11}}$ is inverse proportional to parallelism $K$.
+\begin{equation}
+\label{eq:klemr}
+L_{read\_ M_{11}}=\frac{N_{ROW}}{K}*(N_R+1)
+\end{equation}
 
 \end{frame}
 
@@ -667,7 +855,17 @@ Xeon&\multirow{1}{*}{3.4GHz}&\multirow{1}{*}{n/a}&\multirow{1}{*}{35.1}&\multiro
 
 
 \section{Conclusion}
+\begin{frame}
+\frametitle{Summary of Work}
+The primary contribution of this work is a software/hardware (SW/HW) co-design that allows:
+\begin{itemize}
+\item configuring an MPC controller for a wide range of plants;
+\item updating at run-time the desired trajectory to track;
+\item the flexibility to trade off hardware resources for computing speed;
+\item easing controller deployment by introducing an SW/HW co-design to decouple hardware details from control and embedded software engineers.
+\end{itemize}
 
+\end{frame}
 
 
 %------------------------------------------------
