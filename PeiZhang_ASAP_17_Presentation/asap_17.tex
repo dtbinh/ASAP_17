@@ -353,12 +353,28 @@ $\rho>0$ is the dual update step length.
 \begin{frame}
 \frametitle{Solve $\chi^{i+1}$}
 \framesubtitle{Matrix-vector Multiply (MvM)}
-KKT Condition
+Convert into QP problem:
 \begin{align*}
 &minimize:\;  \frac{1}{2} ({\chi^{i+1}})^{T}E\chi^{i+1}+l^T\chi^{i+1}\\
  &subject\;  to:\; G\chi^{i+1}=h
 \numberthis \label{eq:quad}
 \end{align*}
+Solve (\ref{eq:quad}) via KKT condition:
+\begin{equation}
+\begin{bmatrix}
+\chi^{i+1} \\
+\lambda 
+\end{bmatrix}=
+\begin{bmatrix}
+E&G^T\\
+G&\textbf{0} 
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+-l\\
+h
+\end{bmatrix}
+\label{eq:sol}
+\end{equation}
 \end{frame}
 %------------------------------------------------
 
@@ -430,21 +446,21 @@ $l:=
 %------------------------------------------------
 \begin{frame}
 \frametitle{Hardware Architecture}
-\framesubtitle{Processing Flow}
+\framesubtitle{Processing Flow and the Corresponding Line in Algorithm \ref{alg:ADMM}}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.45\textwidth} % Left column and width
 %\tikz[baseline,remember picture]{\node[anchor=base,marked on=<2->] (t1){
 \uncover<1->{\alert<1>{\begin{block}{Step 1}
-Solve KKT
+Solve KKT (line 4)
 \end{block}}}
 \uncover<2->{\alert<2>{\begin{block}{Step 2}
-Saturation Function
+Saturation Function (line 5)
 \end{block}}}
 \uncover<3->{\alert<3>{\begin{block}{Step 3}
-Update $\upsilon$
+Update $\upsilon$ (line 6)
 \end{block}}}
 \uncover<4->{\alert<4>{\begin{block}{Step 4}
-Update $l$
+Update $l$ (line 3)
 \end{block}}}
 
 
@@ -565,7 +581,49 @@ Trade-off between pipeline stages and DSP usage
 \caption{Runtime Trajectory Planning\label{fig_traj}}
 \end{figure}
 \end{frame}
+%------------------------------------------------
+\begin{frame}
 
+\frametitle{Hardware Architecture}
+\framesubtitle{Runtime Trajectory Planning}
+
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.45\textwidth} % Left column and width
+
+\begin{figure}[t]
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0,overlay] at (-3,0) {
+\includegraphics[scale=.75]{../ASAP_17/figure/trajectoryProfile.pdf}};
+\end{tikzpicture}
+\end{figure}
+
+$l:=
+\begin{bmatrix}
+	Q*R_k\\
+	\textbf{0}
+\end{bmatrix}-\rho (\zeta^{i}+\upsilon^{i})$ \\
+	$\chi^{i+1}:=
+	M_{11}*
+	\begin{bmatrix}
+	-l\&x_{k}
+	\end{bmatrix}^T$
+
+
+\column{.45\textwidth} % Left column and width
+\begin{figure}[t]
+\begin{tikzpicture}
+\node[anchor=south west,overlay] at (-4,-4) {
+\includegraphics[scale=.45]{../ASAP_17/figure/architecture.pdf}};
+\draw[red,ultra thick,rounded corners,->] (-3,-1.5)--(1,1);
+%\draw[red,ultra thick,rounded corners,->] (4,4.5)--(6.5,4.1);
+
+\end{tikzpicture}
+\end{figure}
+
+
+
+\end{columns}
+\end{frame}
 
 %------------------------------------------------
 
@@ -647,7 +705,7 @@ Total Latency:
 %------------------------------------------------
 \subsection{Plant on Chip}
 \begin{frame}
-\frametitle{Plant on Chip}
+\frametitle{Plant on Chip \cite{VyaKum13A}}
 A hardware component that emulates the physical behavior of a linear system.
 \begin{figure}
 \begin{tikzpicture}
@@ -937,22 +995,34 @@ The primary contribution of this work is a software/hardware (SW/HW) co-design t
 
 %------------------------------------------------
 
-\begin{frame}[fragile] % Need to use the fragile option when verbatim is used in the slide
-\frametitle{Citation}
-An example of the \verb|\cite| command to cite within the presentation:\\~
-
-This statement requires citation \cite{p1}.
-\end{frame}
-
-%------------------------------------------------
-
 \begin{frame}
-\frametitle{References}
+\frametitle{Selected References}
 \footnotesize{
 \begin{thebibliography}{99} % Beamer does not support BibTeX so references must be inserted manually as below
-\bibitem[Smith, 2012]{p1} John Smith (2012)
-\newblock Title of the publication
-\newblock \emph{Journal Name} 12(3), 45 -- 678.
+
+\bibitem{VyaKum13A}
+S.~Vyas, C.~Kumar, J.~Zambreno, C.~Gill, R.~Cytron, and P.~Jones, ``An
+  {FPGA}-based {Plant-on-Chip} platform for cyber-physical system analysis,''
+  \emph{IEEE Embedded Systems Letters}, vol.~6, no.~1, 2014.
+
+\bibitem{jerez2014embedded}
+J.~L. Jerez, P.~J. Goulart, S.~Richter, G.~A. Constantinides, E.~C. Kerrigan,
+  and M.~Morari, ``Embedded online optimization for model predictive control at
+  megahertz rates,'' \emph{IEEE Transactions on Automatic Control}, vol.~59,
+  no.~12, 2014.
+
+\bibitem{6422363}
+B.~O'Donoghue, G.~Stathopoulos, and S.~Boyd, ``A splitting method for optimal
+  control,'' \emph{IEEE Transactions on Control Systems Technology}, vol.~21,
+  no.~6, Nov 2013.
+
+\bibitem{6927473}
+J.~Liu, H.~Peyrl, A.~Burg, and G.~A. Constantinides, ``{FPGA} implementation of
+  an interior point method for high-speed model predictive control,'' in
+  \emph{24th International Conference on Field Programmable Logic and
+  Applications}, Sept 2014.
+
+
 \end{thebibliography}
 }
 \end{frame}
