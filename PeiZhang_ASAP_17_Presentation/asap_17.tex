@@ -80,7 +80,7 @@
 \usetikzlibrary{overlay-beamer-styles}
 \newcommand{\tikzmark}[1]{\tikz[remember picture] \node[coordinate] (#1) {#1};}
 \usepackage{verbatim}
-\usetikzlibrary{arrows,shapes}
+\usetikzlibrary{arrows,shapes,matrix,positioning,fit}
 \usepackage{graphicx} % Allows including images
 \usepackage{mathtools}
 %\usepackage{amsmath}
@@ -488,38 +488,68 @@ Update $l$
 \begin{frame}
 \frametitle{Hardware Architecture}
 \framesubtitle{Reduce Circuit}
+The reduce circuit is used to accumulate the output from MVM tree.
+
 \begin{figure}[t!]
-\begin{tikzpicture}
+\begin{tikzpicture}[ampersand replacement=\&]
 \node[anchor=south west,inner sep=0] at (0,0) {
-\includegraphics[scale=.45]{../pic/r_m.pdf}};
+\includegraphics[scale=.55]{../pic/r_m.pdf}};
+
+
+\node[fit={(-3.5,-0.6) (-0.5,0.06)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<1>] (t1) {};
+\node[fit={(0,0.1) (0.7,3)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<1| 3-4>] (n1) {};
+\path[draw=magenta,ultra thick,->]<1>([yshift=0mm,xshift=0mm]t1.north) to [out=0in, in=0in,distance=-0.1in] (n1.west);
+%-------
+\node[fit={(2.2,1.4) (2.4,1.8)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<2>] (t2) {};
+\node[fill=orange,anchor=base,visible on=<2>] (n2) at (4,-1.5){$Result$};
+\path[draw=magenta,ultra thick,->]<2>([yshift=0mm,xshift=0mm]t2.east) to [out=3in, in=0in,distance=-0.3in] (n2.west);
+%-------
+\node[fit={(-3.5,-0.6) (-2.2,0.06)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<3-4>] (t3) {};
+\path[draw=magenta,ultra thick,->]<3>([yshift=0mm,xshift=0mm]t3.north) to [out=0in, in=0in,distance=-0.1in] (n1.west);
+
+\node[fit={(-1.8,-0.6) (-0.5,0.06)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<4-4>] (t4) {};
+\path[draw=magenta,ultra thick,->]<4>([yshift=0mm,xshift=0mm]t4.north) to [out=0in, in=0in,distance=-0.1in] (n1.west);
+%-------
+\node[fit={(2.7,1.65) (3.0,2.0)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<5-6>] (t5) {};
+\node[fill=orange,anchor=base,visible on=<5-6>] (n5) at (5,-0.5){$Result(left\ half)$};
+\path[draw=magenta,ultra thick,->]<5-6>([yshift=0mm,xshift=0mm]t5.east) to [out=3in, in=0in,distance=-0.3in] (n5.west);
+
+\node[fit={(2.5,1.3) (2.8,1.6)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<6>] (t6) {};
+\node[fill=orange,anchor=base,visible on=<6>] (n6) at (5,-1.5){$Result(right\ half)$};
+\path[draw=magenta,ultra thick,->]<6>([yshift=0mm,xshift=0mm]t6.east) to [out=3in, in=0in,distance=-0.3in] (n6.west);
+%-------
+\node[fit={(3.7,1.5) (3.9,1.8)}, inner sep=0pt, draw=red,ultra thick,rounded corners,fill=orange,fill opacity=0.2,visible on=<7>] (t7) {};
+\node[fill=orange,anchor=base,visible on=<7>] (n7) at (5,-1.5){$Result(Accumulate)$};
+\path[draw=magenta,ultra thick,->]<7>([yshift=0mm,xshift=0mm]t7.east) to [out=3in, in=0in,distance=-0.3in] (n7.west);
+
+\matrix [matrix of math nodes,left delimiter={[},right delimiter={]}] at (-2,-1)
+{
+M_{11} \& \ldots \& M_{1N} \\
+\vdots \& \ddots \& \vdots\\
+M_{M1} \& \ldots \& M_{MN}\\
+};
 \end{tikzpicture}
 \end{figure}
 
-\setcounter{MaxMatrixCols}{20}
-\begin{equation*}
-\arraycolsep=3pt
-\scalemath{0.8}{
-G=
-}
-\scalemath{0.6}{
-\begin{bmatrix}
-   I & \dots & \dots & \dots  & \dots &\dots & \dots & \dots &\dots &\dots & \dots & \dots&\dots &\dots & \dots & \dots\\
-   A & -I & \dots & \dots  & \dots & \dots & B & \dots & \dots &\dots &\dots & \dots & \dots &\dots &\dots & \dots\\
-	\dots & A & -I & \dots & \dots & \dots& \dots&B& \dots &\dots &\dots & \dots & \dots &\dots &\dots & \dots\\
-	\dots & \dots  & \dots & \dots & \dots & \dots  & \dots &\dots &\dots & \dots & \dots &B & \dots &\dots &\dots & \dots\\
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots\\
-\dots & \dots & \dots & \dots & A & -I & \dots & \dots & \dots & \dots & \dots & B & \dots &\dots &\dots & \dots\\
-\dots & \dots & \dots & \dots & \dots & \dots & I & -I & \dots & \dots & \dots & \dots & I & \dots  & \dots  & \dots\\ 
-\dots & \dots & \dots & \dots & \dots & \dots &\dots  & I & -I & \dots & \dots & \dots & \dots & I  & \dots & \dots\\
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots\\
-\dots & \dots & \dots & \dots & \dots & \dots &\dots  &\dots &\dots &\dots & I & -I &\dots & \dots & \dots & I
-\end{bmatrix}}
-\label{eq:g}
-\end{equation*}
+\begin{tikzpicture}
+
+ \end{tikzpicture}
+
 
 \end{frame}
 %------------------------------------------------
-
+\begin{frame}
+\frametitle{Hardware Architecture}
+\framesubtitle{Scalability with Reduce Circuit}
+Trade-off between pipeline stages and DSP usage
+\begin{figure}[t]
+\centering
+\captionsetup{justification=centering}
+\includegraphics[scale=0.80]{../pic/r_m_2.pdf}
+\DeclareGraphicsExtensions.
+\end{figure}
+\end{frame}
+%------------------------------------------------
 
 
 \subsection{Trajectory Setting During Runtime}
