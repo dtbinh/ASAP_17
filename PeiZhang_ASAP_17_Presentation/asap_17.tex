@@ -488,13 +488,35 @@ Update $l$
 \begin{frame}
 \frametitle{Hardware Architecture}
 \framesubtitle{Reduce Circuit}
-\begin{figure}[t]
-\centering
-\captionsetup{justification=centering}
-\includegraphics[scale=0.9]{../ASAP_17/figure/Reduce.pdf}
-\DeclareGraphicsExtensions.
-\caption{Reduce Circuit Architecture with Two Cascaded Adders\label{fig_red}}
+\begin{figure}[t!]
+\begin{tikzpicture}
+\node[anchor=south west,inner sep=0] at (0,0) {
+\includegraphics[scale=.45]{../pic/r_m.pdf}};
+\end{tikzpicture}
 \end{figure}
+
+\setcounter{MaxMatrixCols}{20}
+\begin{equation*}
+\arraycolsep=3pt
+\scalemath{0.8}{
+G=
+}
+\scalemath{0.6}{
+\begin{bmatrix}
+   I & \dots & \dots & \dots  & \dots &\dots & \dots & \dots &\dots &\dots & \dots & \dots&\dots &\dots & \dots & \dots\\
+   A & -I & \dots & \dots  & \dots & \dots & B & \dots & \dots &\dots &\dots & \dots & \dots &\dots &\dots & \dots\\
+	\dots & A & -I & \dots & \dots & \dots& \dots&B& \dots &\dots &\dots & \dots & \dots &\dots &\dots & \dots\\
+	\dots & \dots  & \dots & \dots & \dots & \dots  & \dots &\dots &\dots & \dots & \dots &B & \dots &\dots &\dots & \dots\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots\\
+\dots & \dots & \dots & \dots & A & -I & \dots & \dots & \dots & \dots & \dots & B & \dots &\dots &\dots & \dots\\
+\dots & \dots & \dots & \dots & \dots & \dots & I & -I & \dots & \dots & \dots & \dots & I & \dots  & \dots  & \dots\\ 
+\dots & \dots & \dots & \dots & \dots & \dots &\dots  & I & -I & \dots & \dots & \dots & \dots & I  & \dots & \dots\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots\\
+\dots & \dots & \dots & \dots & \dots & \dots &\dots  &\dots &\dots &\dots & I & -I &\dots & \dots & \dots & I
+\end{bmatrix}}
+\label{eq:g}
+\end{equation*}
+
 \end{frame}
 %------------------------------------------------
 
@@ -513,6 +535,7 @@ Update $l$
 \caption{Runtime Trajectory Planning\label{fig_traj}}
 \end{figure}
 \end{frame}
+
 
 %------------------------------------------------
 
